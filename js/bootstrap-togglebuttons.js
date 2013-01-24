@@ -14,7 +14,7 @@
   *  disabled: (as per bootstrap buttons) primary, danger, info, success, warning or false for default button color.
   *  disabledtext: Text Label for Enabled/Active button
   *
-  *  animated: @todo boolean for animation
+  *  animation: boolean = CSS3 transition between button states.  Fixed at 0.2s at this stage.
   *
   *
   * Usage:
@@ -45,7 +45,7 @@
         disabled:    false,
         disabledtext:'OFF',
 
-        animated:    true
+        animation:    true
     },
 
     initialize: function (options, element) {
@@ -65,6 +65,14 @@
         }
 
         this.displayButtons();
+
+        this.checkbox.addEvent('change', function() {
+            if (this.checkbox.checked) {
+                this.setOn(true);
+            } else {
+                this.setOff(true);
+            }
+        }.bind(this));
     },
 
     displayButtons: function () {
@@ -96,6 +104,8 @@
 
         this.button_container.inject(this.element, 'bottom');
 
+        this.button_container.disableSelection();
+
         var button_left_size  = this.button_left.measure( function() { return this.getSize(); });
         var button_right_size = this.button_right.measure( function() { return this.getSize(); });
         var button_width      = (button_left_size.x > button_right_size.x) ? button_left_size.x : button_right_size.x;
@@ -126,6 +136,20 @@
             this.button_blank.style.borderBottomRightRadius = '0px';
             this.button_blank.style.borderTopLeftRadius     = '4px';
             this.button_blank.style.borderBottomLeftRadius  = '4px';
+        }
+
+        if (this.options.animation) {
+            this.button_left.style.transition = 'left 0.2s';
+            this.button_blank.style.transition = 'left 0.2s';
+            this.button_right.style.transition = 'left 0.2s';
+
+            this.button_left.style.WebkitTransition = 'left 0.2s';
+            this.button_blank.style.WebkitTransition = 'left 0.2s';
+            this.button_right.style.WebkitTransition = 'left 0.2s';
+
+            this.button_left.style.MozTransition = 'left 0.2s';
+            this.button_blank.style.MozTransition = 'left 0.2s';
+            this.button_right.style.MozTransition = 'left 0.2s';
         }
 
         this.button_container.setStyles({
@@ -167,16 +191,24 @@
         }
     },
 
-    setOn: function () {
-        e = new Event.Mock(this.element, 'setoff');
-        this.element.fireEvent('setoff', e);
+    setOn: function (triggered_manually) {
+        if (typeof triggered_manually == 'undefined' || triggered_manually === false) {
 
-        if (!this.enabled || e.isDefaultPrevented()) {
-            return;
+            e = new Event.Mock(this.element, 'setoff');
+            this.element.fireEvent('setoff', e);
+
+            if (!this.enabled || e.isDefaultPrevented()) {
+                return;
+            }
+
+            e = new Event.Mock(this.checkbox, 'change');
+            this.checkbox.fireEvent('change', e);
+
+            this.checkbox.checked = true;
+
         }
 
         this.state = true;
-        this.checkbox.checked = true;
 
         this.button_left.setStyle('left', '0%');
         this.button_blank.setStyle('left', '50%');
@@ -186,18 +218,27 @@
         this.button_blank.style.borderBottomRightRadius = '4px';
         this.button_blank.style.borderTopLeftRadius     = '0px';
         this.button_blank.style.borderBottomLeftRadius  = '0px';
+
     },
 
-    setOff: function () {
-        e = new Event.Mock(this.element, 'setoff');
-        this.element.fireEvent('setoff', e);
+    setOff: function (triggered_manually) {
+        if (typeof triggered_manually == 'undefined' || triggered_manually === false) {
 
-        if (!this.enabled || e.isDefaultPrevented()) {
-            return;
+            e = new Event.Mock(this.element, 'setoff');
+            this.element.fireEvent('setoff', e);
+
+            if (!this.enabled || e.isDefaultPrevented()) {
+                return;
+            }
+
+            e = new Event.Mock(this.checkbox, 'change');
+            this.checkbox.fireEvent('change', e);
+
+            this.checkbox.checked = false;
+
         }
 
         this.state = false;
-        this.checkbox.checked = false;
 
         this.button_left.setStyle('left', '-50%');
         this.button_blank.setStyle('left', '0%');
@@ -207,6 +248,7 @@
         this.button_blank.style.borderBottomRightRadius = '0px';
         this.button_blank.style.borderTopLeftRadius     = '4px';
         this.button_blank.style.borderBottomLeftRadius  = '4px';
+
     },
 
     checked: function () {
@@ -215,10 +257,14 @@
 
     enable: function () {
         this.enabled = true;
+        this.button_left.removeClass('disabled');
+        this.button_right.removeClass('disabled');
         return this;
     },
     disable: function () {
         this.enabled = false;
+        this.button_left.addClass('disabled');
+        this.button_right.addClass('disabled');
         return this;
     },
 
@@ -313,6 +359,20 @@ Event.Mock = function(target,type){
 Event.implement({
     isDefaultPrevented: function () {
         return this.event.defaultPrevented;
+    }
+});
+
+Element.implement({
+    disableSelection: function(){
+        if (typeof this.onselectstart!="undefined") //IE route
+            this.onselectstart=function(){return false;};
+        else if (typeof this.style.MozUserSelect!="undefined") //Firefox route
+            this.style.MozUserSelect="none";
+        else //All other route (ie: Opera)
+            this.onmousedown=function(){return false;};
+        this.style.cursor = "default";
+        return this;
+        //this.addClass('-webkit-user-select','none');
     }
 });
 
