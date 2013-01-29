@@ -195,7 +195,7 @@
         if (typeof triggered_manually == 'undefined' || triggered_manually === false) {
 
             e = new Event.Mock(this.element, 'setoff');
-            this.element.fireEvent('setoff', e);
+            this.element.fireEvent('seton', e);
 
             if (!this.enabled || e.isDefaultPrevented()) {
                 return;
