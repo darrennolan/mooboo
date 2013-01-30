@@ -46,6 +46,14 @@ Tooltip = new Class({
                                 // If a number is supplied, delay is applied to both hide/show
                                 // Object structure is: delay: { show: 500, hide: 100 }
 
+        document_placement: false,  // MOOBOO SPECIFIC OPTION
+                                    //  false:  Tip inserts itself after selector/element
+                                    //  true:   Tip inserts itself into the end of the $(document.body)
+                                    //  string: ID Selector for Tip Placement, to be placed inside
+                                    //  {Mootools Element}: Tip inserts inside given element
+                                    //
+                                    //  By default, bootstrap Tips will place themselves just after the selector/element - which can cause stupid css inheritance issues.
+
         template: '<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
 
         // Heads up! Options for individual tooltips can alternatively be specified through the use of data attributes.
@@ -187,8 +195,19 @@ Tooltip = new Class({
             }
 
             tip = tip.dispose();
-            tip.setStyle('display', 'block')
-                .inject(selector, 'after');
+            tip.setStyle('display', 'block');
+
+            if (this.options.document_placement) {
+                if (this.options.document_placement === true) {
+                    $(document.body).grab(tip);
+                } else if (isElement(this.options.document_placement)) {
+                    this.options.document_placement.grab(tip);
+                } else {
+                    $(this.options.document_placement).grab(tip);
+                }
+            } else {
+                tip.inject(selector, 'after');
+            }
 
             if (typeof placement == 'function') {
 
