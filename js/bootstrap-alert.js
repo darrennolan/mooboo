@@ -19,27 +19,6 @@
  * limitations under the License.
  * ========================================================== */
 
-/* ==========================================================
- * bootstrap-alert.js v2.0.4
- * http://twitter.github.com/bootstrap/javascript.html#alerts
- * ==========================================================
- * Copyright 2012 Twitter, Inc.
- *
- * Modified for MooTools by GP Technology Solutions Pty Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ========================================================== */
-
 Element.implement ({
     alert: function(options) {
         if ( this.retrieve('alert') === null ) {
@@ -151,6 +130,14 @@ Alert = new Class({
 });
 
 window.addEvent('domready', function() {
+    $(document.body).getElements('.alert').each(function (alert_element) {
+        if (alert_element.hasClass('fade')) {
+            var timeout_fade_in = setTimeout(function () {
+                alert_element.addClass('in');
+            },300);
+        }
+    });
+
     $(document.body).addEvent('click:relay([data-dismiss=alert])', function() {
         this.alert().close();
     });
